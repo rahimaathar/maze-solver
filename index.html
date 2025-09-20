@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maze Solver</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        textarea {
+            width: 500px;
+            height: 300px;
+        }
+        button {
+            padding: 10px;
+            font-size: 14px;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid black;
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maze Solver</h1>
+    
+    <p><b>Maze Data Format:</b></p>
+    <p>First line: Rows: (number)<br>
+    Second line: Cols: (number)<br>
+    Third line: Start: (row,col)<br>
+    Fourth line: Finish: (row,col)<br>
+    Rest of lines: Valid path coordinates (row,col)</p>
+    
+    <p><b>Output:</b> S = Start, F = Finish, P = Path, X = Wall</p>
+    
+    <p>Enter maze data:</p>
+    <textarea id="mazeInput">Rows: 6
+Cols: 6
+Start: (1,5)
+Finish: (4,0)
+(0,1)
+(0,2)
+(1,2)
+(1,4)
+(1,5)
+(2,2)
+(2,4)
+(3,0)
+(3,1)
+(3,2)
+(3,3)
+(3,4)
+(4,0)
+(4,2)
+(5,1)
+(5,2)
+(5,3)
+(5,4)</textarea>
+    <br><br>
+    <button onclick="solve()">Solve</button>
+    
+    <div id="output" class="output"></div>
+
+    <script>
+        function solve() {
+            var input = document.getElementById('mazeInput').value;
+            var lines = input.split('\n');
+            
+            var rows = parseInt(lines[0].split(':')[1]);
+            var cols = parseInt(lines[1].split(':')[1]);
+            
+            var startLine = lines[2];
+            var startRow = parseInt(startLine.split('(')[1].split(',')[0]);
+            var startCol = parseInt(startLine.split(',')[1].split(')')[0]);
+            
+            var finishLine = lines[3];
+            var finishRow = parseInt(finishLine.split('(')[1].split(',')[0]);
+            var finishCol = parseInt(finishLine.split(',')[1].split(')')[0]);
+            
+            var maze = [];
+            var sol = [];
+            
+            for (var i = 0; i < rows; i++) {
+                maze[i] = [];
+                sol[i] = [];
+                for (var j = 0; j < cols; j++) {
+                    maze[i][j] = false;
+                    sol[i][j] = 'X';
+                }
+            }
+            
+            for (var i = 4; i < lines.length; i++) {
+                if (lines[i].includes('(')) {
+                    var row = parseInt(lines[i].split('(')[1].split(',')[0]);
+                    var col = parseInt(lines[i].split(',')[1].split(')')[0]);
+                    maze[row][col] = true;
+                }
+            }
+            
+            maze[startRow][startCol] = true;
+            maze[finishRow][finishCol] = true;
+            
+            var path = "";
+            
+            if (mazesolver(maze, startRow, startCol, finishRow, finishCol, startRow, startCol, rows, sol, path)) {
+                sol[startRow][startCol] = 'S';
+                sol[finishRow][finishCol] = 'F';
+                
+                var result = "Path found!\n\n";
+                result += "  ";
+                for (var j = 0; j < cols; j++) {
+                    result += j + " ";
+                }
+                result += "\n";
+                
+                for (var i = 0; i < rows; i++) {
+                    result += i + " ";
+                    for (var j = 0; j < cols; j++) {
+                        result += sol[i][j] + " ";
+                    }
+                    result += "\n";
+                }
+                
+                document.getElementById('output').innerHTML = "<pre>" + result + "</pre>";
+            } else {
+                document.getElementById('output').innerHTML = "No path found";
+            }
+        }
+        
+        function mazesolver(arr, startrow, startcol, finishrow, finishcol, currentrow, currentcol, n, sol, path) {
+            if (currentrow < 0 || currentrow >= n || currentcol < 0 || currentcol >= n || sol[currentrow][currentcol] == 'P' || arr[currentrow][currentcol] == false) {
+                return false;
+            }
+            
+            sol[currentrow][currentcol] = 'P';
+            
+            if (currentrow == finishrow && currentcol == finishcol) {
+                sol[currentrow][currentcol] = 'F';
+                path += ")" + currentcol + "," + currentrow + "(";
+                return true;
+            }
+            
+            if (mazesolver(arr, startrow, startcol, finishrow, finishcol, currentrow + 1, currentcol, n, sol, path)) {
+                path += ",)" + currentcol + "," + currentrow + "(";
+                return true;
+            }
+            
+            if (mazesolver(arr, startrow, startcol, finishrow, finishcol, currentrow, currentcol + 1, n, sol, path)) {
+                path += ",)" + currentcol + "," + currentrow + "(";
+                return true;
+            }
+            
+            if (mazesolver(arr, startrow, startcol, finishrow, finishcol, currentrow - 1, currentcol, n, sol, path)) {
+                path += ",)" + currentcol + "," + currentrow + "(";
+                return true;
+            }
+            
+            if (mazesolver(arr, startrow, startcol, finishrow, finishcol, currentrow, currentcol - 1, n, sol, path)) {
+                path += ",)" + currentcol + "," + currentrow + "(";
+                return true;
+            }
+            
+            sol[currentrow][currentcol] = ' ';
+            return false;
+        }
+    </script>
+</body>
+</html>
