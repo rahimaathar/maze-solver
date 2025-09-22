@@ -58,7 +58,6 @@ Finish: (4,0)
 ## Files
 
 - `index.html` - Main web application
-- `26100301_PA03_TASK1.cpp` - Original C++ implementation
 - `maze.txt` - Sample maze data
 
 ## Deployment
